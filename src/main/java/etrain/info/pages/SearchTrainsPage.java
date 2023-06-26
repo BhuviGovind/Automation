@@ -21,17 +21,20 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
+import com.aventstack.extentreports.ExtentTest;
+
 import etrain.info.testngbase.TestNgBase_etrain;
 
 public class SearchTrainsPage extends TestNgBase_etrain {
 	Map<Integer, String> map = new HashMap<Integer, String>();
 	public WebDriverWait wait;
 
-	public SearchTrainsPage(RemoteWebDriver driver) {
-		this.driver = driver;
-		PageFactory.initElements(driver, this);
-	}
-
+	public SearchTrainsPage(RemoteWebDriver driver, ExtentTest node, ExtentTest test) {
+    	this.driver = driver;
+    	this.node = node;
+    	this.test = test;
+        PageFactory.initElements(driver,this);
+        }
 	@FindBy(how = How.XPATH, using = "//input[@placeholder='Source Station']")
 	private WebElement sourceStation;
 	@FindBy(how = How.XPATH, using = "//input[@placeholder='Destination Station']")
@@ -45,26 +48,26 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 
 	/************************** Date Picker **************************/
 	@FindBy(how = How.XPATH, using = "//input[@placeholder='Select Date']")
-	private WebElement datepicker;
+	private WebElement datePicker;
 	@FindBy(how = How.XPATH, using = "//input[@value='>']")
-	private WebElement datepickerNextButton;
+	private WebElement datePickerNextButton;
 	@FindBy(how = How.XPATH, using = "//input[starts-with(@class,'calBtn')]")
-	private WebElement datepickerRow;
+	private WebElement datePickerRow;
 	@FindBy(how = How.XPATH, using = "//input[@class='calBtn today']")
 	private WebElement currentDate;
 	@FindBys({ @FindBy(how = How.XPATH, using = "//input[starts-with(@class,'calBtn')]") })
-	private List<WebElement> datepickerRows;
+	private List<WebElement> datePickerRows;
 
 	/************************** Pantry Availability **************************/
-	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@etitle=\"Pantry Available\" and @style]") })
+	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@etitle='Pantry Available' and @style]") })
 	private List<WebElement> pantryAvailableTrains;
-	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class=\"icon-food h-link\"]/ancestor::tr//td[1]//a") })
+	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class='icon-food h-link']/ancestor::tr//td[1]//a") })
 	private List<WebElement> trainNumber;
-	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class=\"icon-food h-link\"]/ancestor::tr//td[2]//a") })
+	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class='icon-food h-link']/ancestor::tr//td[2]//a") })
 	private List<WebElement> trainName;
-	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class=\"icon-food h-link\"]/ancestor::tr//td[6]") })
+	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class='icon-food h-link']/ancestor::tr//td[6]") })
 	private List<WebElement> arrivalTime;
-	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class=\"icon-food h-link\"]/ancestor::tr//td[4]") })
+	@FindBys({ @FindBy(how = How.XPATH, using = "//i[@class='icon-food h-link']/ancestor::tr//td[4]") })
 	private List<WebElement> departureTime;
 
 	@FindBy(how = How.XPATH, using = "//span[contains(text(),'Request Successful.')]")
@@ -107,7 +110,7 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 		System.out.println("Date added to 45 days from Current Date is : " + futureDate);
 		int count = futureDateMonth - currentDateMonth;
 		for (int i = 1; i <= count; i++) {
-			click(datepickerNextButton);
+			click(datePickerNextButton);
 		}
 		Thread.sleep(8000);
 		driver.findElement(By.xpath("//input[@type='button' and @value='" + futureDateValue + "']")).click();
@@ -116,7 +119,7 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 
 	public SearchTrainsPage currentDateColor() throws InterruptedException {
 		Thread.sleep(3000);
-		click(datepicker);
+		click(datePicker);
 		String color = currentDate.getCssValue("border-color");
 		System.out.println("Border Color Code of Current Date: " + color);
 		String border = Color.fromString(color).asHex();
@@ -139,24 +142,24 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 				System.out.println(trainDetails);
 			}
 			String arrival = arrivalTime.get(i).getText();
-			System.out.println("Arrival Time: " + arrival);
+		//	System.out.println("Arrival Time: " + arrival);
 			String departure = departureTime.get(i).getText();
-			System.out.println("Departure Time: " + departure);
+		//	System.out.println("Departure Time: " + departure);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-			LocalTime arrtime = null;
-			LocalTime deptime = null;
+			LocalTime arrTime = null;
+			LocalTime depTime = null;
 			int arrTimeInMinutes = 0;
 			int deptTimeInMinutes = 0;
 
 			if (!arrival.isEmpty()) {
-				arrtime = LocalTime.parse(arrival, formatter);
+				arrTime = LocalTime.parse(arrival, formatter);
 			}
 			if (!departure.isEmpty()) {
-				deptime = LocalTime.parse(departure, formatter);
+				depTime = LocalTime.parse(departure, formatter);
 			}
-			if (arrtime != null && deptime != null) {
-				arrTimeInMinutes = arrtime.getHour() * 60 + arrtime.getMinute();
-				deptTimeInMinutes = deptime.getHour() * 60 + deptime.getMinute();
+			if (arrTime != null && depTime != null) {
+				arrTimeInMinutes = arrTime.getHour() * 60 + arrTime.getMinute();
+				deptTimeInMinutes = depTime.getHour() * 60 + depTime.getMinute();
 				if (deptTimeInMinutes > arrTimeInMinutes) {
 					arrTimeInMinutes = arrTimeInMinutes + 1440;
 				}
@@ -168,6 +171,7 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 				}
 				if (minutesAsInt > 0) {
 					System.out.println("Travel Time in Minutes: " + minutesAsInt);
+					System.out.println("\n");
 					map.put(minutesAsInt, trainDetails);
 				}
 			}

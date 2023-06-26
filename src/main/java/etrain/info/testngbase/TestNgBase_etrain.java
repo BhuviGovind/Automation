@@ -16,6 +16,7 @@ public class TestNgBase_etrain extends SeleniumBase_etrain {
 
     @AfterMethod
     public void afterMethod() throws InterruptedException {
+    	
             closeApp();
          }
 }
