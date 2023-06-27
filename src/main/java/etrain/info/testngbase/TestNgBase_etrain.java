@@ -19,4 +19,6 @@ public class TestNgBase_etrain extends SeleniumBase_etrain {
     	
             closeApp();
          }
+	
+    
 }

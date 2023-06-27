@@ -41,7 +41,7 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 	private WebElement destinationStation;
 	@FindBy(how = How.XPATH, using = "//a[contains(text(),'CHENNAI EGMORE')]")
 	private WebElement selectSourceValue;
-	@FindBy(how = How.XPATH, using = "//a[contains(text(),'BANGALORE CY JN (SBC)')]")
+	@FindBy(how = How.XPATH, using = "//a[contains(text(),'BANGALORE CY JN (SBC')]")
 	private WebElement selectDestinationValue;
 	@FindBy(how = How.ID, using = "tbssbmtbtn")
 	private WebElement getTrainsButton;
@@ -102,18 +102,12 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 
 	public SearchTrainsPage clickDatePicker() throws InterruptedException {
 		Thread.sleep(5000);
-		LocalDate currentDate = LocalDate.now();
-		LocalDate futureDate = currentDate.plusDays(45);
-		int currentDateMonth = currentDate.getMonthValue();
-		int futureDateMonth = futureDate.getMonthValue();
-		int futureDateValue = futureDate.getDayOfMonth();
-		System.out.println("Date added to 45 days from Current Date is : " + futureDate);
-		int count = futureDateMonth - currentDateMonth;
+		int count = getFutureDateMonth() - getCurrentDateMonth();
 		for (int i = 1; i <= count; i++) {
 			click(datePickerNextButton);
 		}
 		Thread.sleep(8000);
-		driver.findElement(By.xpath("//input[@type='button' and @value='" + futureDateValue + "']")).click();
+		driver.findElement(By.xpath("//input[@type='button' and @value='" + addDaysToCurrentDate().getDayOfMonth() + "']")).click();
 		return this;
 	}
 
@@ -121,76 +115,50 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 		Thread.sleep(3000);
 		click(datePicker);
 		String color = currentDate.getCssValue("border-color");
-		System.out.println("Border Color Code of Current Date: " + color);
 		String border = Color.fromString(color).asHex();
-		System.out.println(border);
 		if (border.equalsIgnoreCase("#00c800")) {
-			System.out.println("The border color of current date is GREEN");
+			reportStep("Border Color Of the Current Date is GREEN " + border , "pass");
+
 		} else {
-			System.out.println("The border color of current date is not GREEN");
+			reportStep("Border Color Of the Current Date is not GREEN " + border , "fail");
+
 		}
 		return this;
 	}
 
-	public SearchTrainsPage calculateFastestTrain() throws ParseException {
-		for (int i = 0; i < pantryAvailableTrains.size(); i++) {
-			String trainDetails = null;
-			String trainNames = trainName.get(i).getText();
-			String trainNumbers = trainNumber.get(i).getText();
-			if (!trainNumbers.isEmpty() && !trainNames.isEmpty()) {
-				trainDetails = "Train Number: " + trainNumbers + " and " + "Train Name: " + trainNames;
-				System.out.println(trainDetails);
-			}
-			String arrival = arrivalTime.get(i).getText();
-		//	System.out.println("Arrival Time: " + arrival);
-			String departure = departureTime.get(i).getText();
-		//	System.out.println("Departure Time: " + departure);
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-			LocalTime arrTime = null;
-			LocalTime depTime = null;
-			int arrTimeInMinutes = 0;
-			int deptTimeInMinutes = 0;
-
-			if (!arrival.isEmpty()) {
-				arrTime = LocalTime.parse(arrival, formatter);
-			}
-			if (!departure.isEmpty()) {
-				depTime = LocalTime.parse(departure, formatter);
-			}
-			if (arrTime != null && depTime != null) {
-				arrTimeInMinutes = arrTime.getHour() * 60 + arrTime.getMinute();
-				deptTimeInMinutes = depTime.getHour() * 60 + depTime.getMinute();
-				if (deptTimeInMinutes > arrTimeInMinutes) {
-					arrTimeInMinutes = arrTimeInMinutes + 1440;
-				}
-				System.out.println("Arrival Time in Minutes: " + arrTimeInMinutes);
-				System.out.println("Departure Time in Minutes: " + deptTimeInMinutes);
-				int minutesAsInt = arrTimeInMinutes - deptTimeInMinutes;
-				if (minutesAsInt < 0) {
-					minutesAsInt = minutesAsInt * -1;
-				}
-				if (minutesAsInt > 0) {
-					System.out.println("Travel Time in Minutes: " + minutesAsInt);
-					System.out.println("\n");
-					map.put(minutesAsInt, trainDetails);
-				}
-			}
-
-		}
-		List<Integer> sortedKeys = new ArrayList<Integer>(map.keySet());
-		Collections.sort(sortedKeys);
-		//System.out.println(sortedKeys);
-		System.out.println("Fastest Train Details: " + map.get(sortedKeys.get(0)));
-		String fastestTrain = map.get(sortedKeys.get(0)).substring(14, 19).trim();
-		//System.out.println(fastestTrain);
+	public SearchTrainsPage findingFastestTrain() throws ParseException {
+		Map<Integer, String> pantryAvailableTrain = getFastestTrain(pantryAvailableTrains, trainName, trainNumber, arrivalTime, departureTime);
+		List<Integer> sortedKeys = new ArrayList<Integer>(pantryAvailableTrain.keySet());
+		Collections.sort(sortedKeys);		
+		System.out.println("Fastest Train Details: " + pantryAvailableTrain.get(sortedKeys.get(0)));
+		String fastestTrain = pantryAvailableTrain.get(sortedKeys.get(0)).substring(14, 19).trim();		
 		driver.findElement(By.xpath("//td[@class='wd55']//a[contains(@href, '" + fastestTrain + "')]")).click();
 		return this;
 	}
 
-	public SearchTrainsPage getVerificationMessage() {
-		String message = verificationMessage.getText();
-		System.out.println("Verification Message: " + message);
-		Assert.assertEquals(message, "Request Successful.");
-		return this;
+//	public SearchTrainsPage getVerificationMessage() {
+//		String message = verificationMessage.getText();
+//		if (message.equalsIgnoreCase("request successful.")) {
+//			System.out.println("Verified the message");
+//			reportStep("Message ' " +message+ " ' is verified", "pass");
+//
+//		} else {
+//			System.out.println("Message is not verified");
+//			reportStep("Message ' " +message+ " ' is not verified", "fail");
+//		}
+//		return this;
+//	}
+	
+	
+	public SearchTrainsPage getVerificationMessage() throws Exception {
+	    String message = verificationMessage.getText();
+	    if (message.equalsIgnoreCase("request successful.")) {
+	        System.out.println("Verified the message");
+	        reportStep("Message '" + message + "' is verified", "pass");
+	    } else {
+	        System.err.println();
+	        reportStep("Message '" + message + "' is not verified", "fail");
+	    }
+	    return this;
 	}
 }

@@ -28,7 +28,7 @@ public class TestCase_01_etrain extends TestNgBase_etrain {
 		.currentDateColor()
 		.clickDatePicker()
 		.clickgetTrainsButton()
-		.calculateFastestTrain()
+		.findingFastestTrain()
 		.getVerificationMessage();
 
 	}
