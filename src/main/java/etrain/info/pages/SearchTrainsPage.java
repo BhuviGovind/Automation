@@ -74,38 +74,35 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 	private WebElement verificationMessage;
 
 	public SearchTrainsPage enterSourceStation() {
-		enterText(sourceStation, "ms");
+		enterText(sourceStation, "ms", " 'Source Station'");
 		return this;
 	}
 
 	public SearchTrainsPage selectSourceStationValue() {
-		click(selectSourceValue);
+		click(selectSourceValue," 'CHENNAI EGMORE (MS)'");
 		return this;
 	}
 
 	public SearchTrainsPage enterdestinationStation() throws InterruptedException {
 		Thread.sleep(2000);
-		enterText(destinationStation, "ksr");
+		enterText(destinationStation, "ksr", " 'Destination Station'");
 		return this;
 	}
 
 	public SearchTrainsPage selectDestinationStationValue() {
-		click(selectDestinationValue);
+		click(selectDestinationValue," 'KSR BANGALORE CY JN (SBC)'");
 		return this;
 	}
 
 	public SearchTrainsPage clickgetTrainsButton() throws InterruptedException {
 		Thread.sleep(5000);
-		click(getTrainsButton);
+		click(getTrainsButton," 'Get Trains' Button");
 		return this;
 	}
 
 	public SearchTrainsPage clickDatePicker() throws InterruptedException {
 		Thread.sleep(5000);
-		int count = getFutureDateMonth() - getCurrentDateMonth();
-		for (int i = 1; i <= count; i++) {
-			click(datePickerNextButton);
-		}
+		clickDatePickerNextButton(datePickerNextButton);
 		Thread.sleep(8000);
 		driver.findElement(By.xpath("//input[@type='button' and @value='" + addDaysToCurrentDate().getDayOfMonth() + "']")).click();
 		return this;
@@ -113,52 +110,20 @@ public class SearchTrainsPage extends TestNgBase_etrain {
 
 	public SearchTrainsPage currentDateColor() throws InterruptedException {
 		Thread.sleep(3000);
-		click(datePicker);
-		String color = currentDate.getCssValue("border-color");
-		String border = Color.fromString(color).asHex();
-		if (border.equalsIgnoreCase("#00c800")) {
-			reportStep("Border Color Of the Current Date is GREEN " + border , "pass");
-
-		} else {
-			reportStep("Border Color Of the Current Date is not GREEN " + border , "fail");
-
-		}
+		click(datePicker, " 'Current Date' in the DatePicker");
+		getBorderColorOfCurrentDateButton(currentDate);
 		return this;
 	}
 
 	public SearchTrainsPage findingFastestTrain() throws ParseException {
 		Map<Integer, String> pantryAvailableTrain = getFastestTrain(pantryAvailableTrains, trainName, trainNumber, arrivalTime, departureTime);
-		List<Integer> sortedKeys = new ArrayList<Integer>(pantryAvailableTrain.keySet());
-		Collections.sort(sortedKeys);		
-		System.out.println("Fastest Train Details: " + pantryAvailableTrain.get(sortedKeys.get(0)));
-		String fastestTrain = pantryAvailableTrain.get(sortedKeys.get(0)).substring(14, 19).trim();		
+		String fastestTrain = sortPantryAvailableTrains(pantryAvailableTrain);
 		driver.findElement(By.xpath("//td[@class='wd55']//a[contains(@href, '" + fastestTrain + "')]")).click();
 		return this;
 	}
 
-//	public SearchTrainsPage getVerificationMessage() {
-//		String message = verificationMessage.getText();
-//		if (message.equalsIgnoreCase("request successful.")) {
-//			System.out.println("Verified the message");
-//			reportStep("Message ' " +message+ " ' is verified", "pass");
-//
-//		} else {
-//			System.out.println("Message is not verified");
-//			reportStep("Message ' " +message+ " ' is not verified", "fail");
-//		}
-//		return this;
-//	}
-	
-	
-	public SearchTrainsPage getVerificationMessage() throws Exception {
-	    String message = verificationMessage.getText();
-	    if (message.equalsIgnoreCase("request successful.")) {
-	        System.out.println("Verified the message");
-	        reportStep("Message '" + message + "' is verified", "pass");
-	    } else {
-	        System.err.println();
-	        reportStep("Message '" + message + "' is not verified", "fail");
-	    }
+	public SearchTrainsPage verifyValidationMessage() throws Exception {
+		getValidationMessage(verificationMessage);
 	    return this;
 	}
 }

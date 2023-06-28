@@ -29,7 +29,7 @@ public class TestCase_01_etrain extends TestNgBase_etrain {
 		.clickDatePicker()
 		.clickgetTrainsButton()
 		.findingFastestTrain()
-		.getVerificationMessage();
+		.verifyValidationMessage();
 
 	}
 }

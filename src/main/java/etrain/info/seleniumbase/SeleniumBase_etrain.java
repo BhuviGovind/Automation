@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.Color;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -51,28 +54,27 @@ public static RemoteWebDriver driver;
 	             System.err.println(e);  
 	             }
 	}
-	public void click(WebElement element) {
-		String elementDescription = element.getText();
+	public void click(WebElement element, String description) {
 		try {
 			wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 			wait.until(ExpectedConditions.elementToBeClickable(element));
 			element.click();
-			reportStep("Clicked on the element " +elementDescription, "pass");
+			reportStep("Clicked on the element " + description, "pass");
 
        }catch(Exception e) {
-           reportStep("Unable to click on the element " +elementDescription, "fail");
+           reportStep("Unable to click on the element " + description, "fail");
            System.err.println(e);
        }
 	}		
-	public void enterText(WebElement element, String data) {
+	public void enterText(WebElement element, String data, String description) {
 		try {
 			wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 			wait.until(ExpectedConditions.visibilityOf(element));
             element.sendKeys(data);
-            reportStep("Entered "+ data +" in the station textbox", "pass");
+            reportStep("Entered "+ data +" in the textbox" + description, "pass");
 
-       } catch(Exception e) {
-          	reportStep("Unable to enter "+ data +" in the station textbox", "fail");
+		} catch(Exception e) {
+          	reportStep("Unable to enter "+ data +" in the textbox" + description, "fail");
           	System.err.println(e);
        }		
 	}
@@ -120,7 +122,7 @@ public static RemoteWebDriver driver;
 			
 			if (!trainNumbers.isEmpty() && !trainNames.isEmpty()) {
 				trainDetails = "Train Number: " + trainNumbers + " and " + "Train Name: " + trainNames;
-				System.out.println(trainDetails);
+//		        reportStep("Trains that have pantry in it is : " +trainDetails, "info");
 			}			
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 			LocalTime arrTime = null;
@@ -139,21 +141,51 @@ public static RemoteWebDriver driver;
 				if (deptTimeInMinutes > arrTimeInMinutes) {
 					arrTimeInMinutes = arrTimeInMinutes + 1440;
 				}
-//				System.out.println("Arrival Time in Minutes: " + arrTimeInMinutes);
-//				System.out.println("Departure Time in Minutes: " + deptTimeInMinutes);
 				int minutesAsInt = arrTimeInMinutes - deptTimeInMinutes;
 				if (minutesAsInt < 0) {
 					minutesAsInt = minutesAsInt * -1;
 				}
 				if (minutesAsInt > 0) {
-					System.out.println("Travel Time in Minutes: " + minutesAsInt);
-					System.out.println("\n");
+					//System.out.println("Travel Time in Minutes: " + minutesAsInt);
+					//System.out.println("\n");
 					map.put(minutesAsInt, trainDetails);
 				}
 			}
 
 		}
 		return map;
+	}
+	public void clickDatePickerNextButton(WebElement datePickerNextButton) {
+		int count = getFutureDateMonth() - getCurrentDateMonth();
+		for (int i = 1; i <= count; i++) {
+			click(datePickerNextButton, " datepicker 'Right Arrow'");
+		}
+	}
+	public void getBorderColorOfCurrentDateButton(WebElement currentDate) {
+		String color = currentDate.getCssValue("border-color");
+		String border = Color.fromString(color).asHex();
+		if (border.equalsIgnoreCase("#00c800")) {
+			reportStep("Border Color of the Current Date is GREEN " + border , "pass");
+
+		} else {
+			reportStep("Border Color of the Current Date is not GREEN " + border , "fail");
+		}	
+	}
+	public String sortPantryAvailableTrains(Map<Integer, String> pantryAvailableTrain) {
+		List<Integer> sortedKeys = new ArrayList<Integer>(pantryAvailableTrain.keySet());
+		Collections.sort(sortedKeys);	
+        reportStep("Fastest Train that has pantry in it is : " +pantryAvailableTrain.get(sortedKeys.get(0)), "info");
+        String fastestTrain = pantryAvailableTrain.get(sortedKeys.get(0)).substring(14, 19).trim();	
+		return fastestTrain;
+	}
+	public void getValidationMessage(WebElement verificationMessage) {
+		 String message = verificationMessage.getText();
+	    if (message.equalsIgnoreCase("request successful.")) {
+	        reportStep("Message '" + message + "' is verified", "pass");
+	    } else {
+	        reportStep("Message '" + message + "' is not verified", "fail");
+	    }
+		
 	}
 }
 	
