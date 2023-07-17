@@ -24,9 +24,9 @@ public class TestNgBase extends SeleniumBase {
             closeApp();
          }
 
-    @DataProvider(name="fetchData")
-    public String[][] sendData(){
-    	return DataInputProvider.readExcelData(excelFileName);
+//    @DataProvider(name="fetchData")
+//    public String[][] sendData(){
+    	//return DataInputProvider.readExcelData(excelFileName);
     	
     }
-}
+
